@@ -1,0 +1,72 @@
+{
+  "name": "Email vers Google Tasks - Tâches à répartir",
+  "nodes": [
+    {
+      "parameters": {
+        "mailbox": "INBOX",
+        "postProcessAction": "nothing",
+        "options": {}
+      },
+      "id": "imap-trigger",
+      "name": "Nouvel Email (IMAP)",
+      "type": "n8n-nodes-base.imapEmail",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "credentials": {
+        "imap": {
+          "id": "IMAP_CREDENTIAL_ID",
+          "name": "IMAP - Votre boîte mail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "task": "={{ $json.subject }}",
+        "additionalFields": {
+          "notes": "De : {{ $json.from }}\nDate : {{ $json.date }}\n\n---\n\n{{ $json.textPlain || $json.text || '' }}",
+          "status": "needsAction"
+        }
+      },
+      "id": "google-tasks-create",
+      "name": "Créer Tâche Google",
+      "type": "n8n-nodes-base.googleTasks",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "GOOGLE_TASKS_CREDENTIAL_ID",
+          "name": "Google Tasks OAuth2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Nouvel Email (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Créer Tâche Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "email",
+      "id": "tag-email"
+    },
+    {
+      "name": "google-tasks",
+      "id": "tag-google-tasks"
+    }
+  ],
+  "pinData": {}
+}
