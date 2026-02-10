@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# Google OAuth credentials (ne jamais commiter)
+credentials.json
+token.json
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
