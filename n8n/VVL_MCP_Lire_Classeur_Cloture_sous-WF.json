@@ -1,0 +1,73 @@
+{
+  "name": "VVL — MCP · Lire Classeur Clôture (sous-WF)",
+  "nodes": [
+    {
+      "id": "trig",
+      "name": "Entree",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            { "name": "onglet", "type": "string" },
+            { "name": "filtre_colonne", "type": "string" },
+            { "name": "filtre_valeur", "type": "string" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "lire",
+      "name": "Lire onglet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [260, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1Zy863dDI696WIdBj9Vgtgi9IGf3kzpC2PZPWm0lB2oo"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $json.onglet }}"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PnEeK4VxcOjC6zzh",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "filtre",
+      "name": "Filtrer & plafonner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 0],
+      "parameters": {
+        "jsCode": "// Paramètres d'entrée (déclencheur)\nconst params = $('Entree').first().json || {};\nconst col = (params.filtre_colonne == null ? '' : params.filtre_colonne).toString().trim();\nconst val = (params.filtre_valeur == null ? '' : params.filtre_valeur).toString().trim();\n\n// Lignes lues depuis Google Sheets\nlet rows = $input.all().map(i => i.json);\n\n// Filtre optionnel par colonne / valeur (insensible à la casse)\nif (col && val) {\n  const v = val.toLowerCase();\n  rows = rows.filter(r => ((r[col] == null ? '' : r[col]).toString().trim().toLowerCase()) === v);\n}\n\n// Total avant plafonnement, puis plafond à 250 lignes\nconst total = rows.length;\nconst LIMITE = 250;\nconst lignes = rows.slice(0, LIMITE);\n\nreturn [{ json: {\n  onglet: params.onglet || '',\n  filtre_colonne: col || null,\n  filtre_valeur: val || null,\n  total_lignes: total,\n  lignes_retournees: lignes.length,\n  plafonne: total > LIMITE,\n  lignes\n} }];"
+      }
+    }
+  ],
+  "connections": {
+    "Entree": {
+      "main": [[{ "node": "Lire onglet", "type": "main", "index": 0 }]]
+    },
+    "Lire onglet": {
+      "main": [[{ "node": "Filtrer & plafonner", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

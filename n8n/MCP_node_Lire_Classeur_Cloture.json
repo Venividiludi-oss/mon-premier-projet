@@ -1,0 +1,40 @@
+{
+  "_comment": "Node Tool Workflow à AJOUTER au workflow 'VVL — Serveur MCP (Claude)' (id C5IMiEDCUUWsJIo2). Remplacer <ID_DU_SOUS_WF> par l'id réel du sous-workflow une fois celui-ci créé. Ne PAS modifier les 4 autres outils existants.",
+  "node": {
+    "id": "cloture_tool",
+    "name": "Lire_Classeur_Cloture",
+    "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+    "typeVersion": 2.2,
+    "position": [280, 430],
+    "parameters": {
+      "description": "Lit un onglet du classeur de clôture 2025. Onglets utiles : 07_Rapprochement_Factures (rapprochements/impayés), 08_Anomalies, 09_Soldes_Bancaires (cohérence des soldes), 10_Statistiques (tableau de bord), 11_Logs_Workflow. Filtre optionnel par colonne/valeur, ex. Statut_Rapprochement = 'Non rapproché'.",
+      "workflowId": {
+        "__rl": true,
+        "value": "<ID_DU_SOUS_WF>",
+        "mode": "list",
+        "cachedResultName": "VVL — MCP · Lire Classeur Clôture (sous-WF)"
+      },
+      "workflowInputs": {
+        "mappingMode": "defineBelow",
+        "value": {
+          "onglet": "={{ $fromAI('onglet','Nom exact de l onglet du classeur de clôture 2025 à lire (ex. 07_Rapprochement_Factures, 08_Anomalies, 09_Soldes_Bancaires, 10_Statistiques, 11_Logs_Workflow).','string') }}",
+          "filtre_colonne": "={{ $fromAI('filtre_colonne','Nom de la colonne sur laquelle filtrer (optionnel).','string','') }}",
+          "filtre_valeur": "={{ $fromAI('filtre_valeur','Valeur recherchée dans la colonne de filtre (optionnel).','string','') }}"
+        },
+        "matchingColumns": [],
+        "schema": [
+          { "id": "onglet", "displayName": "onglet", "required": true, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false, "removed": false },
+          { "id": "filtre_colonne", "displayName": "filtre_colonne", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false, "removed": false },
+          { "id": "filtre_valeur", "displayName": "filtre_valeur", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false, "removed": false }
+        ],
+        "attemptToConvertTypes": false,
+        "convertFieldsToString": true
+      }
+    }
+  },
+  "connection_to_add": {
+    "Lire_Classeur_Cloture": {
+      "ai_tool": [[{ "node": "MCP Server Trigger", "type": "ai_tool", "index": 0 }]]
+    }
+  }
+}
